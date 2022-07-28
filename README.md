@@ -4,7 +4,7 @@
 - Yes it's all CSS except for the buttons because rendering 3D shapes and animations is no problem at all for CSS but as soon as you need basic data binding you're out of luck
 - It is somewhat janky at times, and I've tried my best to optimise it as much as I can (reducing render size, avoiding repaints, etc)
 - But ultimately there's only so much you can do with a coding language that is used to color text boxes
-- Don't even try to open it on a mobile device. It's purely experimental and proof-of-concept. 
+- Don't even try to open it on a mobile device. It's purely experimental and proof-of-concept
 
 ### How to view
 - Download the code

@@ -7,8 +7,6 @@
 	animation-fill-mode: forwards;
 }
 
-// TODO: page texture with radial gradient 
-
 @mixin Object3D($x, $y, $z, $top: true, $front: true, $right: true, $left: true, $back: true, $bottom: true) {
 	transform-style: preserve-3d;
 	display: flex;

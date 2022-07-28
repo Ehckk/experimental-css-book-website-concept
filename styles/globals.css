@@ -1,0 +1,35 @@
+@font-face {
+  font-family: Typewriter;
+  src: url('aflfont.TTF');
+}
+
+:root {
+  /* --scene-transform: rotateX(0deg) rotateZ(0deg) translate3d(0rem, 0rem, 0rem); */
+  --scene-transform: rotateX(90deg) rotateZ(35deg) translate3d(-350rem, -650rem, -118rem);
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+  Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+body {
+  height: 100vh;
+  width: 100vw;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+main {
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	overflow: hidden;
+		background-color: hsl(30, 20%, 20%);
+}

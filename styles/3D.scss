@@ -1,0 +1,83 @@
+@mixin PlayAnimation($name, $duration, $function, $direction, $delay: 0s) {
+	animation-name: $name;
+	animation-duration: $duration;
+	animation-timing-function: $function;
+	animation-direction: $direction;
+	animation-delay: $delay;
+	animation-fill-mode: forwards;
+}
+
+// TODO: page texture with radial gradient 
+
+@mixin Object3D($x, $y, $z, $top: true, $front: true, $right: true, $left: true, $back: true, $bottom: true) {
+	transform-style: preserve-3d;
+	display: flex;
+	.side {
+		position: absolute;
+		width: $baseDim;
+		height: $baseDim;
+	}
+	@if $top == true {
+		.side.top {
+			transform: scale($x, $y);
+		}
+	}
+	@if $front == true {
+		.side.front {
+			transform: rotateX(90deg) translate3d(0, math.div($z, 2) * $baseDim * -1, math.div($y, 2) * $baseDim * -1) scale($x, $z);
+		}
+	}
+	@if $right == true {
+		.side.right {
+			transform: rotateY(90deg) translate3d(math.div($z, 2) * $baseDim, 0, math.div($x, 2) * $baseDim) scale($z, $y);
+		}
+	}
+	@if $left == true {
+		.side.left {
+			transform: rotateY(90deg) translate3d(math.div($z, 2) * $baseDim, 0, math.div($x, 2) * $baseDim * -1) scale($z, $y);
+		}
+	}
+	@if $back == true {		
+		.side.back {
+			transform: rotateX(90deg) translate3d(0, math.div($z, 2) * $baseDim * -1, math.div($y, 2) * $baseDim) scale($x, $z);
+		}
+	}
+	@if $bottom == true {
+		.side.bottom {
+			transform: translate3d(0, 0, $z * $baseDim * -1) scale($x, $y);
+		}
+	}
+}
+
+@mixin Color3D($top: null, $front: null, $right: null, $left: null, $back: null, $bottom: null) {
+	@if $top != null {
+		.side.top {
+			background: $top;
+		}
+	}
+	@if $front != null {
+		.side.front {
+			background: $front;
+		}
+	}
+	@if $right != null {
+		.side.right {
+			background: $right;
+		}
+	}
+	@if $left != null {
+		.side.left {
+			background: $left;
+		}
+	}
+	@if $back != null {
+		.side.back {
+			background: $back;
+		}
+	}
+	@if $bottom != null {
+		.side.bottom {
+			background: $bottom;
+		}
+	}
+}

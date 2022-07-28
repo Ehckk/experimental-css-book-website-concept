@@ -1,0 +1,71 @@
+@use 'sass:math';
+@import './variables.scss';
+@import './3D.scss';
+
+.scene {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	perspective: 8000px;
+}
+
+.plane {
+	position: absolute;
+	background-color: transparent;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transform-style: preserve-3d;
+}
+
+@mixin DefaultTransform {
+	transform: rotateX(45deg) rotateZ(45deg) translate3d($baseDim * -6, $baseDim * -6, $baseDim * -15);
+}
+
+@mixin PreDashboardTransform {
+	transform: rotateX(0deg) rotateZ(0deg) translate3d($baseDim, $baseDim * 5, $baseDim * -8);
+}
+
+@mixin DashboardTransform {
+	transform: rotateX(0deg) rotateZ(0deg) translate3d($baseDim * 3, $baseDim * 4, $baseDim * 4);
+}
+
+.plane.default {
+	@include DefaultTransform();
+}
+.plane.dashboard {
+	@include DashboardTransform();
+}
+
+.plane.toBook {
+	@include DefaultTransform();
+	@include PlayAnimation(ToBook, $baseAnimLength * 2, ease-in, normal, $baseAnimLength * 3);
+}
+.plane.fromBook {
+	@include DashboardTransform();
+	@include PlayAnimation(FromBook, $baseAnimLength * 2, ease-in, normal, $baseAnimLength * 2);
+}
+
+@keyframes ToBook {
+	0% {
+		@include DefaultTransform();
+	}
+	50% {
+		@include PreDashboardTransform();
+	}
+	100% {
+		@include DashboardTransform();
+	}
+}
+@keyframes FromBook {
+	0% {
+		@include DashboardTransform();
+	}
+	50% {
+		@include PreDashboardTransform();
+	}
+	100% {
+		@include DefaultTransform();
+	}
+}

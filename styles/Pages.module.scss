@@ -1,0 +1,303 @@
+@use 'sass:math';
+@import './variables.scss';
+@import './3D.scss';
+
+$pageHue: 40%;
+$pageSaturation: 40%;
+$baseLightness: 70%;
+$lightIncrement: 1.5%;
+$segmentCount: 4;
+$pageSegmentLength: math.div($pageMargin, 2);
+$animationFunction: linear;
+
+@mixin PageSegment($angle, $segmentLength, $segmentLengthPrev) {
+	@if $segmentLengthPrev == null { // base segment
+		transform: translate3d((math.div($pageWidth - ($pageMargin * ($segmentCount + 1)), 2)) * $baseDim * -1, 0, 0) rotateY($angle) scale($segmentLength, $pageLength);
+	} @else { // chain segment
+		transform: translate3d($baseDim, 0, 0) scale(math.div(1, $segmentLengthPrev), 1) rotateY($angle) scale($segmentLength, 1);
+	}
+} 
+
+.pages {
+	@include Object3D($pageWidth, $pageLength, $pageHeight, true, true, true, true, true, true);
+	@include Color3D(
+		$pageColorLight, 
+		$pageColorBase, 
+		$pageColorDark, 
+		$pageColorDark, 
+		$pageColorBase, 
+		$pageColorDark
+	);
+	.firstPage, .secondPage {
+		display: flex;
+		transform-style: preserve-3d;
+		transform-origin: left;
+		.pageContainer, .pageSegment, .page {
+			height: $baseDim;
+			width: $baseDim;
+			position: absolute;
+			transform-style: preserve-3d;
+			z-index: 100;
+			transform-origin: left;
+		}
+		.page {
+			transform-origin: left;
+			.pageContainer {
+				background-color: hsl($pageHue, $pageSaturation, $baseLightness);
+				transform: scale(math.div(1, $pageWidth), math.div(1, $pageLength));
+				height: ($pageLength - ($pageSegmentLength * $segmentCount * 2)) * $baseDim;
+				top: -32.5vh;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				z-index: 101;
+				font-family: Typewriter;
+				font-size: math.div($baseDim, 2);
+				// TODO: font scale variable
+			}	
+		}
+	}
+	.firstPage {
+		> .pageSegment {
+			background-color: hsl($pageHue, $pageSaturation, $baseLightness - $lightIncrement * 4);
+			> .pageSegment {
+				background-color: hsl($pageHue, $pageSaturation, $baseLightness - $lightIncrement * 3);
+				> .pageSegment {
+					background-color: hsl($pageHue, $pageSaturation, $baseLightness - $lightIncrement * 2);
+					> .pageSegment {
+						background-color: hsl($pageHue, $pageSaturation, $baseLightness - $lightIncrement);
+					}
+				}
+			}
+		}
+		.page {
+			background-color: hsl($pageHue, $pageSaturation, $baseLightness);	
+			> .pageSegment {
+				background-color: hsl($pageHue, $pageSaturation, $baseLightness - $lightIncrement);
+				> .pageSegment {
+					background-color: hsl($pageHue, $pageSaturation, $baseLightness - $lightIncrement * 2);
+					> .pageSegment {
+						background-color: hsl($pageHue, $pageSaturation, $baseLightness - $lightIncrement * 3);
+						> .pageSegment {
+							background-color: hsl($pageHue, $pageSaturation, $baseLightness - $lightIncrement * 4);
+						}
+					}
+				}
+			}
+			.pageContainer {
+				width: $pageWidth * $baseDim;
+			}
+			// ACTUAL COVENTIONAL WEBPAGE HOLY SHIT FINALLY
+		}	
+	}
+	.secondPage {
+		> .pageSegment {
+			background-color: hsl($pageHue, $pageSaturation, $baseLightness - $lightIncrement);
+			@include PageSegment(0deg, $pageSegmentLength * $segmentCount, null);
+		}
+		.page {
+			background-color: hsl($pageHue, $pageSaturation, $baseLightness);
+			// ACTUAL COVENTIONAL WEBPAGE HOLY SHIT FINALLY
+			@include PageSegment(0deg, $pageWidth - ($segmentCount * $pageSegmentLength), $pageSegmentLength * $segmentCount);			
+			.pageContainer {
+				width: ($pageWidth - ($pageSegmentLength * $segmentCount)) * $baseDim;
+
+			}
+		}
+	}
+}
+
+.pages.unflipped, .pages.turn {
+	.firstPage {
+		.pageSegment {
+			@include PageSegment(0deg, $pageSegmentLength, $pageSegmentLength);
+		}
+		> .pageSegment {
+			@include PageSegment(0deg, $pageSegmentLength, null);
+		}
+		.page {
+			@include PageSegment(0deg, $pageWidth - ($segmentCount * $pageSegmentLength * 2), $pageSegmentLength);
+			> .pageSegment {
+				@include PageSegment(0deg, $pageSegmentLength, $pageWidth - ($segmentCount * $pageSegmentLength * 2));
+			}
+			.pageContainer {
+				visibility: visible;
+			}
+		}
+	}
+}
+
+.pages.turn {
+	.firstPage {
+		.pageSegment {
+			@include PlayAnimation(FlipPageSegment, $baseAnimLength * 2, $animationFunction, normal);
+		}
+		> .pageSegment {
+			@include PlayAnimation(FlipPageRoot, $baseAnimLength * 2, $animationFunction, normal);
+		}
+		.page {
+			@include PlayAnimation(FlipPage, $baseAnimLength * 2, $animationFunction, normal);
+			.pageSegment {
+				@include PlayAnimation(FlipPageSegment2, $baseAnimLength * 2, $animationFunction, normal);
+			}
+			> .pageSegment {
+				@include PlayAnimation(FlipPageRoot2, $baseAnimLength * 2, $animationFunction, normal);
+			}
+			.pageContainer {
+				@include PlayAnimation(HidePageContents, $baseAnimLength * 2, $animationFunction, normal);
+			}	
+		}
+	}
+}
+
+.pages.flipped, .pages.unturn {
+	.firstPage {
+		.pageSegment {
+			@include PageSegment(-36deg, $pageSegmentLength, $pageSegmentLength);
+		}
+		> .pageSegment {
+			@include PageSegment(-36deg, $pageSegmentLength, null);			
+		}
+		.page {
+			@include PageSegment(-36deg, $pageWidth - ($segmentCount * $pageSegmentLength * 2), $pageSegmentLength);
+			.pageSegment {
+				@include PageSegment(0deg, $pageSegmentLength, $pageSegmentLength);
+			}
+			> .pageSegment {
+				@include PageSegment(0deg, $pageSegmentLength, $pageWidth - ($segmentCount * $pageSegmentLength * 2));
+			}
+			.pageContainer {
+				visibility: hidden;
+			}
+		}
+	}
+}
+
+.pages.unturn {
+	.firstPage {
+		.pageSegment {
+			@include PlayAnimation(FlipPageSegment, $baseAnimLength * 2, $animationFunction, reverse);
+		}
+		> .pageSegment {
+			@include PlayAnimation(FlipPageRoot, $baseAnimLength * 2, $animationFunction, reverse);
+		}
+		.page {
+			@include PlayAnimation(FlipPage, $baseAnimLength * 2, $animationFunction, reverse);
+			.pageSegment {
+				@include PlayAnimation(FlipPageSegment2, $baseAnimLength * 2, $animationFunction, reverse);
+			}
+			> .pageSegment {
+				@include PlayAnimation(FlipPageRoot2, $baseAnimLength * 2, $animationFunction, reverse);
+			}
+			.pageContainer {
+				@include PlayAnimation(HidePageContents, $baseAnimLength * 2, $animationFunction, reverse);
+			}
+		}
+	}
+}
+
+@keyframes FlipPageRoot {
+	0% {
+		@include PageSegment(0deg, $pageSegmentLength, null);
+	}	
+	25% {
+		@include PageSegment(0deg, $pageSegmentLength, null);
+	}
+	50% {
+		@include PageSegment(-18deg, $pageSegmentLength, null);
+	}
+	75% {
+		@include PageSegment(-36deg, $pageSegmentLength, null);
+	}		
+	100% {
+		@include PageSegment(-36deg, $pageSegmentLength, null);
+	}	
+}
+@keyframes FlipPageRoot2 {
+	0% {
+		@include PageSegment(0deg, $pageSegmentLength, $pageWidth - ($segmentCount * $pageSegmentLength * 2));
+	}
+	25% {
+		@include PageSegment(-6deg, $pageSegmentLength, $pageWidth - ($segmentCount * $pageSegmentLength * 2));
+	}
+	50% {
+		@include PageSegment(0deg, $pageSegmentLength, $pageWidth - ($segmentCount * $pageSegmentLength * 2));
+	}
+	75% {
+		@include PageSegment(6deg, $pageSegmentLength, $pageWidth - ($segmentCount * $pageSegmentLength * 2));
+	}
+	100% {
+		@include PageSegment(0deg, $pageSegmentLength, $pageWidth - ($segmentCount * $pageSegmentLength * 2));
+	}
+}
+@keyframes FlipPageSegment {
+	0% {
+		@include PageSegment(0deg, $pageSegmentLength, $pageSegmentLength);
+	}
+	25% {
+		@include PageSegment(0deg, $pageSegmentLength, $pageSegmentLength);
+	}
+	50% {
+		@include PageSegment(-18deg, $pageSegmentLength, $pageSegmentLength);
+	}
+	75% {	
+		@include PageSegment(-36deg, $pageSegmentLength, $pageSegmentLength);
+	}
+	100% {
+		@include PageSegment(-36deg, $pageSegmentLength, $pageSegmentLength);
+	}	
+}
+@keyframes FlipPageSegment2 {
+	0% {
+		@include PageSegment(0deg, $pageSegmentLength, $pageSegmentLength);
+	}
+	25% {
+		@include PageSegment(-6deg, $pageSegmentLength, $pageSegmentLength);
+	}
+	50% {
+		@include PageSegment(0deg, $pageSegmentLength, $pageSegmentLength);
+	}
+	75% {
+		@include PageSegment(6deg, $pageSegmentLength, $pageSegmentLength);
+	}
+	100% {
+		@include PageSegment(0deg, $pageSegmentLength, $pageSegmentLength);
+	}	
+}
+@keyframes FlipPage {
+	0% {
+		@include PageSegment(0deg, $pageWidth - ($segmentCount * $pageSegmentLength * 2), $pageSegmentLength);
+	}
+	25% {
+		@include PageSegment(0deg, $pageWidth - ($segmentCount * $pageSegmentLength * 2), $pageSegmentLength);
+	}
+	50% {
+		@include PageSegment(-18deg, $pageWidth - ($segmentCount * $pageSegmentLength * 2), $pageSegmentLength);
+	}
+	75% {
+		@include PageSegment(-36deg, $pageWidth - ($segmentCount * $pageSegmentLength * 2), $pageSegmentLength);
+	}
+	100% {
+		@include PageSegment(-36deg, $pageWidth - ($segmentCount * $pageSegmentLength * 2), $pageSegmentLength);
+	}
+}
+@keyframes HidePageContents {
+	0% {
+		visibility: visible;
+	}
+	50% {
+		visibility: hidden;
+	}
+	100% {
+		visibility: hidden;
+	}
+}
+
+.pageContents {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}

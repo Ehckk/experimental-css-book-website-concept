@@ -1,0 +1,213 @@
+@use 'sass:math';
+@import './variables.scss';
+
+$pageFontColor: hsl(15, 25%, 2%);
+
+.box {
+	button {
+		background-color: $utilColorDark2;
+		color: $utilTextColorLight2;
+		border-style: none; 
+		outline: none;
+		font-weight: 400;
+		user-select: none;
+		&:after {
+			position: absolute;
+			background-image: linear-gradient(90deg, $utilColorDark3 5%, $utilColorBase 95%);
+			opacity: 0;
+			user-select: none;
+		}
+		&:hover {
+			cursor: pointer;
+			&:after {
+				opacity: 100;
+			}
+		}
+	}
+	padding: .5rem;
+	margin: .5rem;
+	border-radius: .5rem;
+	background-image: linear-gradient(90deg, $utilColorLight1 5%, $utilColorLight3 95%);
+	position: absolute;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+.box.mainControls, .box.displayControls, .box.bookControls, .box.pageControls {
+	left: 0;
+}
+.box.mainControls {
+	top: 0;
+}
+.box.displayControls {
+	top: 25%;
+}
+.box.bookControls {
+	top: 50%;
+}
+.box.pageControls {
+	top: 75%;
+}
+
+%centerFlex {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+%baseButtonMargins {
+	margin-top: .15rem;
+	margin-bottom: .15rem;
+	border-radius: 1.125rem;
+	color: $utilTextColorLight2;
+}
+
+%mainControlButton {
+	height: 2rem;
+	width: 7.5rem;
+	font-size: 1rem;
+	@extend %baseButtonMargins;
+}
+
+%controlButton {
+	height: 1.75rem;
+	width: 6.25em;
+	font-size: .825rem;
+	@extend %baseButtonMargins;
+
+}
+
+%subControlButton {
+	height: 1.5rem;
+	width: 5rem;
+	font-size: .75rem;
+	@extend %baseButtonMargins;
+}
+
+button.mainControl {
+	@extend %mainControlButton;
+	&:after {
+		@extend %mainControlButton;
+		@extend %centerFlex;
+		transform: translateY(-1.85rem);
+	}
+	&:active {
+		transform: translateY(.125rem);
+		&:after {
+			left: 0;
+		}
+	}
+}
+
+button.control {
+	@extend %controlButton;
+	&:after {
+		@extend %controlButton;
+		@extend %centerFlex;
+		transform: translateY(-1.55rem);
+	}
+	&:active {
+		transform: translateY(.125rem);
+		&:after {
+			left: 0;
+		}
+	}
+}
+
+button.subControl {
+	@extend %subControlButton;
+	&:after {
+		@extend %subControlButton;
+		@extend %centerFlex;
+		transform: translateY(-1.4rem);
+	}
+	&:active {
+		transform: translateY(.125rem);
+		&:after {
+			left: 0;
+		}
+	}
+}
+
+.box.displayControls {
+	button.control {
+		&:after {
+			content: 'Set';
+		}
+	}
+}
+
+.box.ribbonControls, .box.bookControls, .box.pageControls, .box.mainControls {
+	button.control, button.mainControl {
+		&:after {
+			content: 'Play';
+		}
+	}
+}
+
+button.subControl {
+	&:after {
+		content: 'debug';
+	}
+}
+
+.pageWrapper {
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+h1.page, h2.page, p.page, button.page {
+	font-family: Typewriter;
+	color: $pageFontColor
+}
+
+h1.page, h2.page {
+	height: 25%;
+	display: flex;
+	text-align: center;
+	align-items: center;
+}
+
+p.page {
+	height: 50%;
+	display: flex;
+	text-align: center;
+	align-items: center;
+}
+
+%pageButton {
+	height: 30%;
+	width: 30%;
+	margin: 10%;
+	border-color: $pageFontColor;
+	border-radius: 2.5rem;
+	background-color: $pageColorDark;
+	outline: none;
+	font-size: 1.25rem;
+}
+
+.page.buttonWrapper {
+	height: 25%;
+	width: 100%;
+	position: relative;
+	background-color: transparent;
+	user-select: none;
+	button.page {
+		@extend %pageButton;
+		pointer-events: all;
+		&:hover {
+			background-color: $pageFontColor;
+			color: $pageColorDark;
+		}
+	}
+	button.page.disabled {
+		pointer-events: none;
+	}
+}

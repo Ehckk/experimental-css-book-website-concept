@@ -1,0 +1,250 @@
+@use 'sass:math';
+@import './variables.scss';
+@import './3D.scss';
+
+$animationFunction: linear;
+
+%lockBottomSegment {
+	content: '';
+	position: absolute;
+	width: 58%;
+	height: 100%;
+	transform-style: preserve-3d;
+}
+
+%lockFaceSide {
+	content: '';
+	position: absolute;
+	width: 50%;
+	border-top-width: math.div($baseDim, 4);
+	border-right-width: math.div($baseDim, 4);
+	border-bottom-width: 0;
+	border-left-width: math.div($baseDim, 4);
+	border-style: solid;
+	border-right-color: transparent;
+	border-left-color: transparent;
+	transform-origin: top;
+	transform: translate3d(0, $baseDim, 0);
+}
+
+.book {
+	transform-style: preserve-3d;
+	.frontCover {
+		@include Object3D($bookWidth, $bookLength, $coverHeight, true, true, true, true, true, true);
+		@include Color3D(
+			$bookColorLight2, 
+			$bookColorBase,
+			$bookColorLight1, 
+			$bookColorDark1, 
+			$bookColorLight2, 
+			$bookColorBase,
+		);
+	}
+	.frontCover.opened, .frontCover.shutCover {
+		transform: translate3d(($bookWidth - $coverHeight - math.div($pageMargin, 2)) * $baseDim * -1, 0, 0) rotateY(-180deg);
+	}
+	.frontCover.closed, .frontCover.openCover {
+		transform: translate3d(math.div($pageMargin, 2) * $baseDim, 0, $coverHeight * $baseDim);
+	}
+	.frontCover.openCover {
+		@include PlayAnimation(OpenBook, $baseAnimLength * 2, $animationFunction, normal, $baseAnimLength * 5);
+	}
+	.frontCover.shutCover {
+		@include PlayAnimation(OpenBook, $baseAnimLength * 2, $animationFunction, reverse);
+	}
+	.backCover {
+		@include Object3D($bookWidth, $bookLength, $coverHeight, true, true, true, true, true, true);
+		@include Color3D(
+			$bookColorLight1, 
+			$bookColorDark1, 
+			$bookColorDark1, 
+			$bookColorDark2, 
+			$bookColorLight1, 
+			$bookColorDark2
+		);
+		transform: translate3d(math.div($pageMargin, 2) * $baseDim, 0, $pageHeight * $baseDim * -1);
+	}
+	.spine {
+		@include Object3D($spineWidth, $bookLength, $bookHeight, true, true, true, true, true, true);
+		@include Color3D(
+			$bookColorDark1, 
+			$bookColorDark3, 
+			$bookColorDark2, 
+			$bookColorDark2, 
+			$bookColorDark1, 
+			$bookColorDark3
+		);
+		transform: translate3d((math.div($bookWidth + $spineWidth - $pageMargin, 2)) * $baseDim * -1, 0, $coverHeight * $baseDim);
+	} 	
+	$lockDim: math.div($bookWidth, 4);
+	$lockZ: $coverHeight;
+	.lock {
+		@include Object3D($lockDim, $lockDim, $lockZ, true, false, false, false, true, true);
+		@include Color3D(
+			radial-gradient(farthest-side at center 25%, $lockColorLight2 50%, $lockColorLight1),
+			$lockColorDark2,
+			linear-gradient(180deg, $lockColorBase, $lockColorDark2),
+			linear-gradient(180deg, $lockColorBase, $lockColorDark2),
+			$lockColorBase,
+			$lockColorDark2
+		);
+
+		.side.front {
+			transform: translate3d(0, math.div($lockDim , 2) * math.div($baseDim * 7, 8), math.div($lockZ, 2) * $baseDim * -1) rotateX(90deg) scale(math.div($lockDim, 2), $lockZ);
+			transform-style: preserve-3d;
+			&:after {
+				@extend %lockBottomSegment;
+				transform-origin: right;
+				background-color: $lockColorDark2;
+				transform: translate3d(math.div($lockDim * 23, 64) * $baseDim * -1, 0, 0) rotateY(30deg); 
+			}
+			&:before {
+				@extend %lockBottomSegment;
+				transform-origin: left;
+				background-color: $lockColorDark2;
+				transform: translate3d(math.div($lockDim * 5, 8) * $baseDim, 0, 0) rotateY(-30deg); 
+			}
+		}
+		.side.right {
+			transform: rotateY(90deg) translate3d(math.div($lockZ, 2) * $baseDim, math.div($lockDim, 8) * $baseDim * -1, math.div($lockDim, 2) * $baseDim) scale($lockZ, math.div($lockDim * 3, 4));
+		}
+		.side.left {
+			transform: rotateY(90deg) translate3d(math.div($lockZ, 2) * $baseDim, math.div($lockDim, 8) * $baseDim * -1, math.div($lockDim, 2) * $baseDim * -1) scale($lockZ, math.div($lockDim * 3, 4));
+		}	
+		.side.top {
+			display: flex;
+			justify-content: center;
+			transform: translate3d(0, math.div($lockDim, 8) * $baseDim * -1, 0) scale($lockDim, math.div($lockDim * 3, 4));
+			&:after {
+				@extend %lockFaceSide;
+				border-top-color: $lockColorLight1;
+			}
+			.lockTop {
+				height: $baseDim;
+				width: $baseDim;
+				display: flex;
+				justify-content: center;
+				z-index: 100;
+				.keyhole {
+					height: 30%;
+					width: 30%;
+					border-radius: 50%;
+					margin-top: 20%;
+					background-color: black;
+					&:after {
+						content: '';
+						position: absolute;
+						z-index: 100;
+						width: 10%;
+						margin-top: 15%;
+						border-top-width: 0;
+						border-right-width: math.div(1, 10) * $baseDim;
+						border-bottom-width: math.div(9, 20) * $baseDim;
+						border-left-width: math.div(1, 10) * $baseDim;
+						border-style: solid;
+						border-top-color: 0;
+						border-right-color: transparent;
+						border-bottom-color: black;
+						border-left-color: transparent;
+					}
+				}
+			}
+		}
+		.side.bottom {
+			transform: translate3d(0, math.div($lockDim, 8) * $baseDim * -1, $lockZ * $baseDim * -1) scale($lockDim, math.div($lockDim * 3, 4));
+			z-index: 100;
+			&:before {
+				z-index: 100;
+				@extend %lockFaceSide;
+				border-top-color: $lockColorDark2;
+			}
+		}
+	}
+	.lock.opened, .lock.shutCover {
+		transform: translate3d(($bookWidth - $coverHeight + math.div($pageMargin - $spineWidth, 2)) * $baseDim * -1, 0, $coverHeight * $baseDim * -1) rotateY(-180deg);
+		.side.top {
+			.lockTop {
+				transform: translate3d(0, math.div($lockDim * 5, 64) * $baseDim, 0) scale(math.div($lockDim * 5, 8), math.div($lockDim * 25, 32)) rotateZ(90deg);
+			}
+		}
+	}
+	.lock.closed, .lock.openCover {
+		transform: translate3d((math.div($pageMargin - $spineWidth, 2)) * $baseDim, 0, ($coverHeight * 2) * $baseDim);
+		.side.top {
+			.lockTop {
+				transform: translate3d(0, math.div($lockDim * 5, 64) * $baseDim, 0) scale(math.div($lockDim * 5, 8), math.div($lockDim * 25, 32)) rotateZ(0deg);
+			}
+		}
+	}
+	.lock.openCover {
+		@include PlayAnimation(OpenLock, $baseAnimLength * 2, $animationFunction, normal, $baseAnimLength * 5);
+		.side.top {
+			.lockTop {
+				@include PlayAnimation(UnlockBook, $baseAnimLength, linear, normal);	
+			}
+		}
+	}
+	.lock.shutCover {
+		@include PlayAnimation(OpenLock, $baseAnimLength * 2, $animationFunction, reverse);
+		.side.top {
+			.lockTop {
+				@include PlayAnimation(UnlockBook, $baseAnimLength, linear, reverse, $baseAnimLength * 6);
+			}
+		}
+	}
+
+}
+
+@keyframes UnlockBook {
+	0% {
+		transform: translate3d(0, math.div(math.div($bookWidth, 4) * 5, 64) * $baseDim, 0) scale(math.div(math.div($bookWidth, 4) * 5, 8), math.div(math.div($bookWidth, 4) * 25, 32)) rotateZ(0deg);
+	}
+
+	25% {
+		transform: translate3d(0, math.div(math.div($bookWidth, 4) * 5, 64) * $baseDim, 0) scale(math.div(math.div($bookWidth, 4) * 5, 8), math.div(math.div($bookWidth, 4) * 25, 32)) rotateZ(0deg);
+	}
+
+	75% {
+		transform: translate3d(0, math.div(math.div($bookWidth, 4) * 5, 64) * $baseDim, 0) scale(math.div(math.div($bookWidth, 4) * 5, 8), math.div(math.div($bookWidth, 4) * 25, 32)) rotateZ(90deg);
+	}
+
+	100% {
+		transform: translate3d(0, math.div(math.div($bookWidth, 4) * 5, 64) * $baseDim, 0) scale(math.div(math.div($bookWidth, 4) * 5, 8), math.div(math.div($bookWidth, 4) * 25, 32)) rotateZ(90deg);
+	}
+}
+
+@keyframes OpenBook {
+	0% {
+		transform: translate3d(math.div($pageMargin, 2) * $baseDim, 0, $coverHeight * $baseDim);
+	}
+	25% {
+		transform: translate3d(($spineWidth + $coverHeight - $pageMargin) * $baseDim * -1, 0, ((math.div($bookWidth, 2) * math.sin(-45deg)) + $pageMargin) * $baseDim * -1) rotateY(-45deg);
+	}
+	50% {
+		transform: translate3d((math.div($bookWidth - $coverHeight, 2)) * $baseDim * -1, 0, (math.div($bookWidth + $spineWidth + $coverHeight + $pageMargin, 2)) * $baseDim) rotateY(-90deg);
+	}
+	75% {
+		transform: translate3d(($bookWidth - $pageMargin - $coverHeight - $spineWidth) * $baseDim * -1, 0, ((math.div($bookWidth, 2) * math.sin(-135deg)) + $coverHeight + $pageMargin) * $baseDim * -1) rotateY(-135deg);
+	}
+	100% {
+		transform: translate3d(($bookWidth - $coverHeight - math.div($pageMargin, 2)) * $baseDim * -1, 0, 0) rotateY(-180deg);
+	}
+}
+
+@keyframes OpenLock {
+	0% {
+		transform: translate3d((math.div($pageMargin - $spineWidth, 2)) * $baseDim, 0, ($coverHeight * 2) * $baseDim);
+	}
+	25% {
+		transform: translate3d(($spineWidth + $coverHeight - $pageMargin) * $baseDim * -1, 0, ((math.div($bookWidth, 2) * math.sin(-45deg)) + $pageMargin - $coverHeight) * $baseDim * -1) rotateY(-45deg);
+	}
+	50% {
+		transform: translate3d((math.div($bookWidth - $coverHeight, 2) + $coverHeight) * $baseDim * -1, 0, (math.div($bookWidth + $spineWidth + $coverHeight + $pageMargin, 2)) * $baseDim) rotateY(-90deg);
+	}
+	75% {
+		transform: translate3d(($bookWidth - $pageMargin - $spineWidth) * $baseDim * -1, 0, ((math.div($bookWidth, 2) * math.sin(-135deg)) + $pageMargin + $coverHeight) * $baseDim * -1) rotateY(-135deg);
+	}
+	100% {
+		transform: translate3d(($bookWidth - $coverHeight + math.div($pageMargin - $spineWidth, 2)) * $baseDim * -1, 0, $coverHeight * $baseDim * -1) rotateY(-180deg);
+	}
+}

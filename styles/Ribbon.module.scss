@@ -1,0 +1,574 @@
+@use 'sass:math';
+@import './variables.scss';
+@import './3D.scss';
+
+$ribbonHue: 0;
+$baseLightness: 30%;
+$segmentCount: 4;
+$animationLength: 1s;
+$animationFunction: linear;
+
+@mixin RibbonTop($angle, $segmentLength, $segmentLengthPrev: null) {
+	@if $segmentLengthPrev == null { // base segment
+		transform: rotateZ(90deg) translate3d(math.div($bookLength, 2) * $baseDim * -1, math.div($baseDim, 2), $segmentLength * $baseDim * -1) rotateY($angle) scale($segmentLength, math.div($bookWidth, 4));
+	} @else { // chain segment
+		transform: translate3d($baseDim * -1, 0, 0) scale(math.div(1, $segmentLengthPrev), 1) rotateY($angle) scale($segmentLength, 1);
+	}
+}
+
+@mixin RibbonBottom($angle, $segmentLength, $segmentLengthPrev: null) {
+	@if $segmentLengthPrev == null { // base segment
+		transform: rotateZ(90deg) translate3d(math.div($bookLength, 2) * $baseDim, math.div($baseDim, 2) * -1, $segmentLength * $baseDim * -1) rotateY($angle) scale($segmentLength, math.div($bookWidth, 4));
+	} @else { // chain segment
+		transform: translate3d($baseDim, 0, 0) scale(math.div(1, $segmentLengthPrev), 1) rotateY($angle) scale($segmentLength, 1);
+	}
+}
+
+@mixin RibbonLeft($angle, $segmentLength, $segmentLengthPrev: null) {
+	@if $segmentLengthPrev == null { // base segment
+		transform: translate3d((math.div($bookWidth - $coverHeight, 2)) * $baseDim * -1, 0, $segmentLength * $baseDim * -1) rotateY($angle) scale($segmentLength, math.div($bookWidth, 4));
+	} @else { // chain segment
+		transform: translate3d($baseDim, 0, 0) scale(math.div(1, $segmentLengthPrev), 1) rotateY($angle) scale($segmentLength, 1);
+	}
+}
+
+@mixin RibbonRight($angle, $segmentLength, $segmentLengthPrev: null) {
+	@if $segmentLengthPrev == null { // base segment
+		transform: translate3d((math.div($bookWidth - $coverHeight, 2)) * $baseDim, 0, $segmentLength * $baseDim * -1) rotateY($angle) scale($segmentLength, math.div($bookWidth, 4));
+	} @else { // chain segment
+		transform: translate3d($baseDim * -1, 0, 0) scale(math.div(1, $segmentLengthPrev), 1) rotateY($angle) scale($segmentLength, 1);
+	}
+}
+
+.ribbon {
+	display: flex;
+	transform-style: preserve-3d;
+	transform: translate3d(math.div($spineWidth - $pageMargin, 2) * $baseDim * -1, 0,  $coverHeight * $baseDim);
+	div {
+		height: $baseDim;
+		width: $baseDim;
+		position: absolute;
+		transform-style: preserve-3d;
+		z-index: 100;
+	}
+	$lightIncrement: 1.5%;
+	> div {
+		background-color: hsl($ribbonHue, 90%, $baseLightness);
+		> div {
+			background-color: hsl($ribbonHue, 90%, $baseLightness + $lightIncrement);
+			> div {
+				background-color: hsl($ribbonHue, 90%, $baseLightness + $lightIncrement * 2);
+				> div {
+					background-color: hsl($ribbonHue, 90%, $baseLightness + $lightIncrement * 3);
+					> div {
+						background-color: hsl($ribbonHue, 90%, $baseLightness + $lightIncrement * 4);
+						> div {
+							background-color: hsl($ribbonHue, 90%, $baseLightness + $lightIncrement * 5);
+						}
+					}
+				}
+			}
+		}
+	}
+	.top {
+		div {
+			transform-origin: right;
+		}
+		transform-origin: right;
+	}
+	.bottom {
+		div {
+			transform-origin: left;
+		}
+		transform-origin: left;
+	}
+	.left {
+		div {
+			transform-origin: left;
+		}
+		transform-origin: left;
+
+	}
+	.right {
+		div {
+			transform-origin: right;
+		}
+		transform-origin: right;
+	}
+}
+
+.ribbon.closed, .ribbon.openCover {
+	.top {
+		@include RibbonTop(90deg, $bookHeight);
+		> div {
+			@include RibbonTop(90deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+			div {
+				@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+			}
+		}
+	}
+	.bottom {
+		@include RibbonBottom(-90deg, $bookHeight);
+		> div {
+			@include RibbonBottom(-90deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+			div {
+				@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+			}
+		}
+	}
+	.left {
+		@include RibbonLeft(-90deg, $bookHeight);
+		> div {
+			@include RibbonLeft(90deg, math.div($bookWidth + $spineWidth, $segmentCount * 2), $bookHeight);
+			div {
+				@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+			}
+		}
+	}
+	.right {
+		@include RibbonRight(90deg, $bookHeight);
+		> div {
+			@include RibbonRight(-90deg, math.div($bookWidth + $spineWidth, $segmentCount * 2), $bookHeight);
+			div {
+				@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+			}
+		}
+	}
+}
+
+.ribbon.opened, .ribbon.shutCover {
+	.top {
+		@include RibbonTop(0deg, $bookHeight);
+		> div {
+			@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+			div {
+				@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+			}
+		}
+	}
+	.bottom {
+		@include RibbonBottom(0deg, $bookHeight);
+		> div {
+			@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+			div {
+				@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+			}
+		}
+	}
+	.left {
+		@include RibbonLeft(180deg, $bookHeight);
+		> div {
+			@include RibbonLeft(00deg, math.div($bookWidth + $spineWidth, $segmentCount * 2), $bookHeight);
+			div {
+				@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+			}
+		}
+	}
+	.right {
+		@include RibbonRight(180deg, $bookHeight);
+		> div {
+			@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, $segmentCount * 2), $bookHeight);
+			div {
+				@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+			}
+		}
+	}
+}
+
+.ribbon.openCover {
+	.top {
+		@include PlayAnimation(RemoveRibbonTopSide, $animationLength, $animationFunction, normal, $baseAnimLength);
+		> div {
+			@include PlayAnimation(RemoveRibbonTop1, $animationLength, $animationFunction, normal, $baseAnimLength);
+			> div {
+				@include PlayAnimation(RemoveRibbonTop2, $animationLength, $animationFunction, normal, $baseAnimLength);
+				> div {
+					@include PlayAnimation(RemoveRibbonTop3, $animationLength, $animationFunction, normal, $baseAnimLength);
+					> div {
+						@include PlayAnimation(RemoveRibbonTop4, $animationLength, $animationFunction, normal, $baseAnimLength);
+					}
+				}
+			}
+		}
+	}	
+	.bottom {
+		@include PlayAnimation(RemoveRibbonBottomSide, $animationLength, $animationFunction, normal, $baseAnimLength);
+		> div {
+			@include PlayAnimation(RemoveRibbonBottom1, $animationLength, $animationFunction, normal, $baseAnimLength);
+			> div {
+				@include PlayAnimation(RemoveRibbonBottom2, $animationLength, $animationFunction, normal, $baseAnimLength);
+				> div {
+					@include PlayAnimation(RemoveRibbonBottom3, $animationLength, $animationFunction, normal, $baseAnimLength);
+					> div {
+						@include PlayAnimation(RemoveRibbonBottom4, $animationLength, $animationFunction, normal, $baseAnimLength);
+					}
+				}
+			}
+		}
+	}
+	.left {
+		@include PlayAnimation(RemoveRibbonLeftSide, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+		> div {
+			@include PlayAnimation(RemoveRibbonLeft1, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+			> div {
+				@include PlayAnimation(RemoveRibbonLeft2, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+				> div {
+					@include PlayAnimation(RemoveRibbonLeft3, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+					> div {
+						@include PlayAnimation(RemoveRibbonLeft4, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+					}
+				}
+			}
+		}
+	}
+	.right {
+		@include PlayAnimation(RemoveRibbonRightSide, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+		> div {
+			@include PlayAnimation(RemoveRibbonRight1, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+			> div {
+				@include PlayAnimation(RemoveRibbonRight2, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+				> div {
+					@include PlayAnimation(RemoveRibbonRight3, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+					> div {
+						@include PlayAnimation(RemoveRibbonRight4, $animationLength, $animationFunction, normal, $baseAnimLength * 2);
+					}
+				}
+			}
+		}
+	}
+}
+
+.ribbon.shutCover {
+	.top {
+		@include PlayAnimation(RemoveRibbonTopSide, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+		> div {
+			@include PlayAnimation(RemoveRibbonTop1, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+			> div {
+				@include PlayAnimation(RemoveRibbonTop2, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+				> div {
+					@include PlayAnimation(RemoveRibbonTop3, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+					> div {
+						@include PlayAnimation(RemoveRibbonTop4, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+					}
+				}
+			}
+		}
+	}	
+	.bottom {
+		@include PlayAnimation(RemoveRibbonBottomSide, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+		> div {
+			@include PlayAnimation(RemoveRibbonBottom1, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+			> div {
+				@include PlayAnimation(RemoveRibbonBottom2, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+				> div {
+					@include PlayAnimation(RemoveRibbonBottom3, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+					> div {
+						@include PlayAnimation(RemoveRibbonBottom4, $animationLength, $animationFunction, reverse, $baseAnimLength * 5);
+					}
+				}
+			}
+		}
+	}
+	.left {
+		@include PlayAnimation(RemoveRibbonLeftSide, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+		> div {
+			@include PlayAnimation(RemoveRibbonLeft1, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+			> div {
+				@include PlayAnimation(RemoveRibbonLeft2, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+				> div {
+					@include PlayAnimation(RemoveRibbonLeft3, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+					> div {
+						@include PlayAnimation(RemoveRibbonLeft4, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+					}
+				}
+			}
+		}
+	}
+	.right {
+		@include PlayAnimation(RemoveRibbonRightSide, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+		> div {
+			@include PlayAnimation(RemoveRibbonRight1, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+			> div {
+				@include PlayAnimation(RemoveRibbonRight2, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+				> div {
+					@include PlayAnimation(RemoveRibbonRight3, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+					> div {
+						@include PlayAnimation(RemoveRibbonRight4, $animationLength, $animationFunction, reverse, $baseAnimLength * 4);
+					}
+				}
+			}
+		}
+	}
+}
+
+@keyframes RemoveRibbonTopSide {
+	0% {
+		@include RibbonTop(90deg, $bookHeight);
+	}
+	60% {
+		@include RibbonTop(90deg, $bookHeight);
+	}
+	100% {
+		@include RibbonTop(0deg, $bookHeight);
+	}
+}
+@keyframes RemoveRibbonTop1 {
+	0% {
+		@include RibbonTop(90deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+	}
+	30% {
+		@include RibbonTop(30deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+	}
+	60% {
+		@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+	}
+	100% {
+		@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+	}	
+}
+@keyframes RemoveRibbonTop2 {
+	0% {
+		@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));	
+	}
+	30% {
+		@include RibbonTop(60deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	60% {
+		@include RibbonTop(15deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	100% {
+		@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+}
+@keyframes RemoveRibbonTop3 {
+	0% {
+		@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));	
+	}
+	30% {
+		@include RibbonTop(60deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	60% {
+		@include RibbonTop(150deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	100% {
+		@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+}
+@keyframes RemoveRibbonTop4 {
+	0% {
+		@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));	
+	}
+	30% {
+		@include RibbonTop(-60deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	60% {
+		@include RibbonTop(15deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	100% {
+		@include RibbonTop(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+}
+
+@keyframes RemoveRibbonBottomSide {
+	0% {
+		@include RibbonBottom(-90deg, $bookHeight);
+	}
+	60% {
+		@include RibbonBottom(-90deg, $bookHeight);
+	}
+	100% {
+		@include RibbonBottom(0deg, $bookHeight);
+	}
+}
+@keyframes RemoveRibbonBottom1 {
+	0% {
+		@include RibbonBottom(-90deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+	}
+	30% {
+		@include RibbonBottom(-30deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+	}
+	60% {
+		@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+	}
+	100% {
+		@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), $bookHeight);
+	}	
+}
+@keyframes RemoveRibbonBottom2 {
+	0% {
+		@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));	
+	}
+	30% {
+		@include RibbonBottom(-60deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	60% {
+		@include RibbonBottom(-15deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	100% {
+		@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+}
+@keyframes RemoveRibbonBottom3 {
+	0% {
+		@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));	
+	}
+	30% {
+		@include RibbonBottom(-60deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	60% {
+		@include RibbonBottom(-150deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	100% {
+		@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+}
+@keyframes RemoveRibbonBottom4 {
+	0% {
+		@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));	
+	}
+	30% {
+		@include RibbonBottom(60deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	60% {
+		@include RibbonBottom(-15deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+	100% {
+		@include RibbonBottom(0deg, math.div($bookLength, $segmentCount * 2), math.div($bookLength, $segmentCount * 2));
+	}
+}
+
+@keyframes RemoveRibbonLeftSide {
+	0% {
+		@include RibbonLeft(-90deg, $bookHeight);
+	}
+	60% {
+		@include RibbonLeft(-90deg, $bookHeight);
+	}
+	100% {
+		@include RibbonLeft(-180deg, $bookHeight);
+	}
+}
+@keyframes RemoveRibbonLeft1 {
+	0% {
+		@include RibbonLeft(90deg, math.div($bookWidth + $spineWidth, $segmentCount * 2), $bookHeight);
+	}
+	30% {
+		@include RibbonLeft(30deg, math.div($bookWidth + $spineWidth, $segmentCount * 2), $bookHeight);
+	}
+	60% {
+		@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), $bookHeight);
+	}
+	100% {
+		@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), $bookHeight);
+	}
+}
+@keyframes RemoveRibbonLeft2 {
+	0% {
+		@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	30% {
+		@include RibbonLeft(60deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	60% {
+		@include RibbonLeft(15deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	100% {
+		@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+}
+@keyframes RemoveRibbonLeft3 {
+	0% {
+		@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	30% {
+		@include RibbonLeft(60deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	60% {
+		@include RibbonLeft(150deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	100% {
+		@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+}
+@keyframes RemoveRibbonLeft4 {
+	0% {
+		@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	30% {
+		@include RibbonLeft(-60deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	60% {
+		@include RibbonLeft(15deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	100% {
+		@include RibbonLeft(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+}
+
+@keyframes RemoveRibbonRightSide {
+	0% {
+		@include RibbonRight(90deg, $bookHeight);
+	}
+	60% {
+		@include RibbonRight(90deg, $bookHeight);
+	}
+	100% {
+		@include RibbonRight(180deg, $bookHeight);
+	}
+}
+@keyframes RemoveRibbonRight1 {
+	0% {
+		@include RibbonRight(-90deg, math.div($bookWidth + $spineWidth, $segmentCount * 2), $bookHeight);
+	}
+	30% {
+		@include RibbonRight(-30deg, math.div($bookWidth + $spineWidth, $segmentCount * 2), $bookHeight);
+	}
+	60% {
+		@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), $bookHeight);
+	}
+	100% {
+		@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), $bookHeight);
+	}
+}
+@keyframes RemoveRibbonRight2 {
+	0% {
+		@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	30% {
+		@include RibbonRight(-60deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	60% {
+		@include RibbonRight(-15deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	100% {
+		@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+}
+@keyframes RemoveRibbonRight3 {
+	0% {
+		@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	30% {
+		@include RibbonRight(-60deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	60% {
+		@include RibbonRight(-150deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	100% {
+		@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+}
+@keyframes RemoveRibbonRight4 {
+	0% {
+		@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	30% {
+		@include RibbonRight(60deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	60% {
+		@include RibbonRight(-15deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+	100% {
+		@include RibbonRight(0deg, math.div($bookWidth + $spineWidth, 2 * $segmentCount), math.div($bookWidth + $spineWidth, 2 * $segmentCount));
+	}
+}
